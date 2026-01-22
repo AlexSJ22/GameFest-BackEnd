@@ -1,19 +1,8 @@
 <?PHP
-session_start();
-$_SESSION = array();
-
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(
-        session_name(),
-        '',
-        time() - 42000,
-        $params["path"],
-        $params["domain"],
-        $params["secure"],
-        $params["httponly"]
-    );
+require_once 'functions.php';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    enviarJSON(['success' => false, 'message' => 'Método no permitido'], 405);
 }
-print_r($params);
-session_destroy();
+$resultado = logout();
+enviarJSON($resultado, 200);
 ?>

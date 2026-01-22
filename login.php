@@ -1,17 +1,28 @@
-<?PHP
-session_start();
+<?php
+require_once 'functions.php';
 
-$user = loginUsuario($_POST['email'], $_POST['password']);
-
-if ($user) {
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['role'] = $user['role']; // ADMIN o USER
-
-    header("Location: index.php");
-    exit;
-} else {
-    echo "Credenciales incorrectas";
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    enviarJSON(['success' => false, 'message' => 'Método no permitido'], 405);
 }
 
+$input = json_decode(file_get_contents('php://input'), true);
+
+if (!isset($input['email']) || !isset($input['password'])) {
+    enviarJSON(['success' => false, 'message' => 'Email y contraseña son requeridos'], 400);
+}
+
+$email = trim($input['email']);
+$password = $input['password'];
+
+if (empty($email) || empty($password)) {
+    enviarJSON(['success' => false, 'message' => 'Email y contraseña son requeridos'], 400);
+}
+
+$resultado = loginUsuario($email, $password);
+
+if ($resultado['success']) {
+    enviarJSON($resultado, 200);
+} else {
+    enviarJSON($resultado, 401);
+}
 ?>

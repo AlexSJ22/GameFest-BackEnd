@@ -1,5 +1,5 @@
 <?php
-require_once '../../functions.php';
+require_once 'functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     enviarJSON(['success' => false, 'message' => 'Método no permitido'], 405);

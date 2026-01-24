@@ -1,0 +1,67 @@
+RewriteEngine On
+RewriteBase /
+
+# CORS Headers
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type"
+
+# ============================================
+# GAMES (públicos)
+# ============================================
+# GET /games -> games/games.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^games/?$ games/games.php [L,QSA]
+
+# GET /games/5 -> games/datailGame.php?id=5
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^games/([0-9]+)/?$ games/datailGame.php?id=$1 [L,QSA]
+
+# ============================================
+# EVENTS
+# ============================================
+# GET /events?page=1 -> events/events.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/?$ events/events.php [L,QSA]
+
+# GET /events/5 -> events/detailEvent.php?id=5
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/([0-9]+)/?$ events/detailEvent.php?id=$1 [L,QSA]
+
+# POST /events (crear evento ADMIN) -> events/createEvent.php
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^events/?$ events/createEvent.php [L,QSA]
+
+# POST /events/5/signup -> events/signup.php?id=5
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^events/([0-9]+)/signup/?$ events/signup.php?id=$1 [L,QSA]
+
+# DELETE /events/5/signup -> events/unsignup.php?id=5
+RewriteCond %{REQUEST_METHOD} DELETE
+RewriteRule ^events/([0-9]+)/signup/?$ events/unsignup.php?id=$1 [L,QSA]
+
+# ============================================
+# AUTH (privados con sesiones)
+# ============================================
+# POST /auth/register -> auth/register.php
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^auth/register/?$ auth/register.php [L,QSA]
+
+# POST /auth/login -> auth/login.php
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^auth/login/?$ auth/login.php [L,QSA]
+
+# POST /auth/logout -> auth/logout.php
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^auth/logout/?$ auth/logout.php [L,QSA]
+
+# ============================================
+# USERS (privados con sesiones)
+# ============================================
+# GET /users/me -> users/loggedUser.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^users/me/?$ users/loggedUser.php [L,QSA]
+
+# GET /users/me/events -> users/myEvents.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^users/me/events/?$ users/myEvents.php [L,QSA]

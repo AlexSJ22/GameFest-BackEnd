@@ -625,16 +625,16 @@ function mostrarEventosPorTipo($tipo, $page = 1)
 }
 
 /**
- * Metodo para mostrar los juegos filtrados por genero
- * @param mixed $genero Se proporciona el genero a filtrar
- * @return array|array{error: string} Devuelve un array con los juegos filtrados
+ * Metodo para mostrar los juegos por nombre
+ * @param mixed $genero Se proporciona el nombre
+ * @return array|array{error: string} Devuelve un array con los juegos filtrados por el nombre
  */
-function mostrarJuegosPorGenero($genero)
+function mostrarJuegosPorTitulo($titulo)
 {
     $mysqli = conectarBD();
     try {
-        $stmt = $mysqli->prepare("SELECT id, titulo, genero, plataformas, imagen, descripcion FROM games WHERE genero = ?;");
-        $stmt->bind_param("s", $genero);
+        $stmt = $mysqli->prepare("SELECT id, titulo, genero, plataformas, imagen, descripcion FROM games WHERE titulo = ?;");
+        $stmt->bind_param("s", $titulo);
         $stmt->execute();
         $resultado = $stmt->get_result();
         $juegos = $resultado->fetch_all(MYSQLI_ASSOC);

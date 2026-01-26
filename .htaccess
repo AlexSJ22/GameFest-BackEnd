@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /
+RewriteBase /GameFest-BackEnd/
 
 # CORS Headers
 Header set Access-Control-Allow-Origin "*"
@@ -13,9 +13,9 @@ Header set Access-Control-Allow-Headers "Content-Type"
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^games/?$ games/games.php [L,QSA]
 
-# GET /games/5 -> games/datailGame.php?id=5
+# GET /games/5 -> games/detailGame.php?id=5
 RewriteCond %{REQUEST_METHOD} GET
-RewriteRule ^games/([0-9]+)/?$ games/datailGame.php?id=$1 [L,QSA]
+RewriteRule ^games/([0-9]+)/?$ games/detailGame.php?id=$1 [L,QSA]
 
 # ============================================
 # EVENTS

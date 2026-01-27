@@ -494,6 +494,9 @@ function obtenerEventos($page = 1, $id = null)
             $limit = 9;
             $offset = ($page - 1) * $limit;
 
+            $totalResult = $mysqli->query("SELECT COUNT(*) as total FROM events");
+            $total = $totalResult->fetch_assoc()['total'];
+
             $stmt = $mysqli->prepare("SELECT * FROM events ORDER BY fecha ASC LIMIT ? OFFSET ?");
             $stmt->bind_param("ii", $limit, $offset);
             $stmt->execute();
@@ -504,7 +507,7 @@ function obtenerEventos($page = 1, $id = null)
                     $evento['inscrito'] = verificarInscrito($evento['id']);
                 }
             }
-            return $eventos;
+            return ["total" => $total, "eventos" => $eventos];
         }
     } catch (Exception $e) {
         return ["error" => "Error al obtener eventos: " . $e->getMessage()];
@@ -530,6 +533,11 @@ function mostrarEventosConPlazasLibres($page = 1)
         $limit = 9;
         $offset = ($page - 1) * $limit;
 
+        $totalResult = $mysqli->query(
+            "SELECT COUNT(*) as total FROM events WHERE plazasLibres > 0"
+        );
+        $total = $totalResult->fetch_assoc()['total'];
+
         $stmt = $mysqli->prepare("
             SELECT id, titulo, tipo, fecha, hora, plazasLibres, imagen, descripcion 
             FROM events 
@@ -547,7 +555,7 @@ function mostrarEventosConPlazasLibres($page = 1)
             }
         }
 
-        return $eventos;
+        return ["total" => $total, "eventos" => $eventos];
 
     } catch (Exception $e) {
         return ["error" => "Error al obtener eventos: " . $e->getMessage()];
@@ -570,6 +578,11 @@ function mostrarEventosPorFecha($fecha, $page = 1)
         $limit = 9;
         $offset = ($page - 1) * $limit;
 
+        $totalResult = $mysqli->query(
+            "SELECT COUNT(*) as total FROM events WHERE plazasLibres > 0"
+        );
+        $total = $totalResult->fetch_assoc()['total'];
+
         $stmt = $mysqli->prepare("SELECT id, titulo, tipo, fecha, hora, plazasLibres, imagen, descripcion FROM events WHERE fecha = ? ORDER BY hora ASC LIMIT ? OFFSET ?;");
         $stmt->bind_param("sii", $fecha, $limit, $offset);
         $stmt->execute();
@@ -581,7 +594,7 @@ function mostrarEventosPorFecha($fecha, $page = 1)
             }
         }
 
-        return $eventos;
+        return ["total" => $total, "eventos" => $eventos];
 
     } catch (Exception $e) {
         return ["error" => "Error al obtener eventos: " . $e->getMessage()];
@@ -604,6 +617,11 @@ function mostrarEventosPorTipo($tipo, $page = 1)
         $limit = 9;
         $offset = ($page - 1) * $limit;
 
+        $totalResult = $mysqli->query(
+            "SELECT COUNT(*) as total FROM events WHERE plazasLibres > 0"
+        );
+        $total = $totalResult->fetch_assoc()['total'];
+
         $stmt = $mysqli->prepare("SELECT id, titulo, tipo, fecha, hora, plazasLibres, imagen, descripcion FROM events WHERE tipo = ? ORDER BY fecha ASC, hora ASC LIMIT ? OFFSET ?;");
         $stmt->bind_param("sii", $tipo, $limit, $offset);
         $stmt->execute();
@@ -615,7 +633,7 @@ function mostrarEventosPorTipo($tipo, $page = 1)
             }
         }
 
-        return $eventos;
+        return ["total" => $total, "eventos" => $eventos];
 
     } catch (Exception $e) {
         return ["error" => "Error al obtener eventos: " . $e->getMessage()];

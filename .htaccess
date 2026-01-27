@@ -17,6 +17,9 @@ RewriteRule ^games/?$ games/games.php [L,QSA]
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^games/([0-9]+)/?$ games/detailGame.php?id=$1 [L,QSA]
 
+# GET /games/search?titulo=XXX -> games/gamesByTitle.php?titulo=XXX
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^games/search/?$ games/gamesByTitle.php [L,QSA]
 # ============================================
 # EVENTS
 # ============================================
@@ -39,6 +42,22 @@ RewriteRule ^events/([0-9]+)/signup/?$ events/signup.php?id=$1 [L,QSA]
 # DELETE /events/5/signup -> events/unsignup.php?id=5
 RewriteCond %{REQUEST_METHOD} DELETE
 RewriteRule ^events/([0-9]+)/signup/?$ events/unsignup.php?id=$1 [L,QSA]
+
+# ============================================
+# FILTERED EVENTS
+# ============================================
+
+# GET /events/filter/available?page=1 -> events/eventsWithSlots.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/filter/available/?$ events/eventsWithSlots.php [L,QSA]
+
+# GET /events/filter/date?fecha=2026-02-15&page=1 -> events/eventsByDate.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/filter/date/?$ events/eventsByDate.php [L,QSA]
+
+# GET /events/filter/type?tipo=Competitivo&page=1 -> events/eventsByType.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/filter/type/?$ events/eventsByType.php [L,QSA]
 
 # ============================================
 # AUTH (privados con sesiones)

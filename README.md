@@ -27,8 +27,8 @@ API REST para el festival de videojuegos GameFest. Desarrollada con PHP, MySQL y
 ```
 gamefest-backend/
 ├── auth/           # Login, logout, registro
-├── events/         # Eventos (crear, listar, inscribirse)
-├── games/          # Videojuegos (listar, detalle)
+├── events/         # Eventos (crear, listar, inscribirse, detalle, filtrar)
+├── games/          # Videojuegos (listar, detalle, filtrar)
 ├── users/          # Datos del usuario
 ├── .htaccess       # Configuración de rutas
 └── functions.php   # Funciones compartidas
@@ -41,10 +41,14 @@ gamefest-backend/
 ### 🔓 Públicos (sin login)
 
 ```
-GET  /games              # Todos los juegos
-GET  /games/{id}         # Detalle de un juego
-GET  /events?page=1      # Eventos (9 por página)
-GET  /events/{id}        # Detalle de un evento
+GET  /games                                             # Todos los juegos
+GET  /games/{id}                                        # Detalle de un juego
+GET  /games/search?titulo=XXX                           # Juegos filtrados por titulo
+GET  /events?page=1                                     # Eventos (9 por página)
+GET  /events/{id}                                       # Detalle de un evento
+GET  /events/filter/available?page=1                    # Eventos con plazas libres
+GET  /events/filter/date?fecha=YYYY-MM-DD&page=1        # Eventos por fecha
+GET  /events/filter/type?tipo=XXX&page=1                # Eventos por tipo
 ```
 
 ### 🔐 Privados (requieren login)

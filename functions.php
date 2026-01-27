@@ -698,4 +698,52 @@ function mostrarJuegosPorPlataforma($plataforma)
         $mysqli->close();
     }
 }
+
+/**
+ * Metodo para buscar juegos en titulo, genero y plataformas desde un único input
+ * @param mixed $busqueda Texto de búsqueda que se aplicará a título, género y plataformas
+ * @return array|array{error: string} Devuelve un array con los juegos encontrados
+ */
+function buscarJuegosGlobal($busqueda)
+{
+    $mysqli = conectarBD();
+
+    try {
+        if (empty($busqueda)) {
+            return ["success" => false, "message" => "Debe proporcionar un término de búsqueda"];
+        }
+
+        // Preparar el término de búsqueda para LIKE
+        $searchTerm = "%" . $busqueda . "%";
+        $searchJson = json_encode($busqueda);
+
+        // Consulta que busca en título, género Y plataformas
+        $sql = "SELECT id, titulo, genero, plataformas, imagen, descripcion 
+                FROM games 
+                WHERE titulo LIKE ? 
+                   OR genero LIKE ? 
+                   OR JSON_SEARCH(plataformas, 'one', ?) IS NOT NULL
+                ORDER BY titulo ASC";
+
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("sss", $searchTerm, $searchTerm, $busqueda);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $juegos = $resultado->fetch_all(MYSQLI_ASSOC);
+
+        // Decodificar plataformas JSON
+        foreach ($juegos as &$juego) {
+            if (isset($juego['plataformas'])) {
+                $juego['plataformas'] = json_decode($juego['plataformas'], true);
+            }
+        }
+
+        return ["success" => true, "total" => count($juegos), "juegos" => $juegos];
+
+    } catch (Exception $e) {
+        return ["success" => false, "error" => "Error al buscar juegos: " . $e->getMessage()];
+    } finally {
+        $mysqli->close();
+    }
+}
 ?>

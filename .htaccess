@@ -20,6 +20,10 @@ RewriteRule ^games/([0-9]+)/?$ games/detailGame.php?id=$1 [L,QSA]
 # GET /games/search?titulo=XXX -> games/gamesByTitle.php?titulo=XXX
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^games/search/?$ games/gamesByTitle.php [L,QSA]
+
+# GET /games/search?q=XXX -> games/globalSearch.php (BÚSQUEDA GLOBAL EN TODO)
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^games/search/?$ games/globalSearch.php [L,QSA]
 # ============================================
 # EVENTS
 # ============================================

@@ -669,4 +669,33 @@ function mostrarJuegosPorTitulo($titulo)
         $mysqli->close();
     }
 }
+
+/**
+ * Obtiene juegos filtrados por plataforma
+ * @param mixed $plataforma Nombre de la plataforma a buscar
+ * @return array|array{error: string} Devuelve un array con los juegos filtrados
+ */
+function mostrarJuegosPorPlataforma($plataforma)
+{
+    $mysqli = conectarBD();
+    try {
+        $stmt = $mysqli->prepare("SELECT id, titulo, genero, plataformas, imagen, descripcion FROM games WHERE JSON_CONTAINS(plataformas, ?);");
+        $jsonValue = json_encode($plataforma);
+        $stmt->bind_param("s", $jsonValue);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $juegos = $resultado->fetch_all(MYSQLI_ASSOC);
+
+        foreach ($juegos as &$juego) {
+            if (isset($juego['plataformas'])) {
+                $juego['plataformas'] = json_decode($juego['plataformas'], true);
+            }
+        }
+        return $juegos;
+    } catch (Exception $e) {
+        return ["error" => "Error al obtener juegos: " . $e->getMessage()];
+    } finally {
+        $mysqli->close();
+    }
+}
 ?>

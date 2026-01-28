@@ -17,13 +17,9 @@ RewriteRule ^games/?$ games/games.php [L,QSA]
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^games/([0-9]+)/?$ games/detailGame.php?id=$1 [L,QSA]
 
-# GET /games/search?titulo=XXX -> games/gamesByTitle.php?titulo=XXX
+# GET /games/search?q=XXX -> games/gameFilter.php (BÚSQUEDA GLOBAL)
 RewriteCond %{REQUEST_METHOD} GET
-RewriteRule ^games/search/?$ games/gamesByTitle.php [L,QSA]
-
-# GET /games/search?q=XXX -> games/globalSearch.php (BÚSQUEDA GLOBAL EN TODO)
-RewriteCond %{REQUEST_METHOD} GET
-RewriteRule ^games/search/?$ games/globalSearch.php [L,QSA]
+RewriteRule ^games/search/?$ games/gameFilter.php [L,QSA]
 # ============================================
 # EVENTS
 # ============================================
@@ -47,6 +43,18 @@ RewriteRule ^events/([0-9]+)/signup/?$ events/signup.php?id=$1 [L,QSA]
 RewriteCond %{REQUEST_METHOD} DELETE
 RewriteRule ^events/([0-9]+)/signup/?$ events/unsignup.php?id=$1 [L,QSA]
 
+# GET /events/filter/available?page=1 -> events/eventsWithSlots.php
+# IMPORTANTE: Las rutas de filtros van ANTES de /events para evitar conflictos
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/filter/available/?$ events/eventsWithSlots.php [L,QSA]
+
+# GET /events/filter/date?fecha=2026-02-15&page=1 -> events/eventsByDate.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/filter/date/?$ events/eventsByDate.php [L,QSA]
+
+# GET /events/filter/type?tipo=Competitivo&page=1 -> events/eventsByType.php
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^events/filter/type/?$ events/eventsByType.php [L,QSA]
 # ============================================
 # FILTERED EVENTS
 # ============================================

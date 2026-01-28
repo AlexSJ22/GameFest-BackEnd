@@ -647,17 +647,32 @@ function mostrarEventosPorTipo($tipo, $page = 1)
 }
 
 /**
- * Metodo para mostrar los juegos por nombre
- * @param mixed $genero Se proporciona el nombre
- * @return array|array{error: string} Devuelve un array con los juegos filtrados por el nombre
+ * Metodo para buscar un juego globalmente plataforma, genero y titulo
+ * @param mixed $busqueda   Se le pasa el valor de la busqueda
+ * @return array|array{error: string}
  */
-function mostrarJuegosPorTitulo($titulo)
+function buscarJuegos($busqueda)
 {
     $mysqli = conectarBD();
     try {
-        $stmt = $mysqli->prepare("SELECT id, titulo, genero, plataformas, imagen, descripcion FROM games WHERE titulo = ?;");
-        $stmt->bind_param("s", $titulo);
-        $stmt->execute();
+        $busqueda = trim($busqueda);
+
+        if ($busqueda === '') {
+            $stmt = $mysqli->prepare("SELECT id, titulo, genero, plataformas, imagen, descripcion FROM games");
+            $stmt->execute();
+        } else {
+            $query = "
+                SELECT id, titulo, genero, plataformas, imagen, descripcion
+                FROM games
+                WHERE LOWER(titulo) LIKE CONCAT('%', LOWER(?), '%')
+                   OR LOWER(genero) LIKE CONCAT('%', LOWER(?), '%')
+                   OR JSON_SEARCH(LOWER(plataformas), 'one', LOWER(?), NULL, '$') IS NOT NULL
+            ";
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param("sss", $busqueda, $busqueda, $busqueda);
+            $stmt->execute();
+        }
+
         $resultado = $stmt->get_result();
         $juegos = $resultado->fetch_all(MYSQLI_ASSOC);
 
@@ -666,86 +681,10 @@ function mostrarJuegosPorTitulo($titulo)
                 $juego['plataformas'] = json_decode($juego['plataformas'], true);
             }
         }
+
         return $juegos;
     } catch (Exception $e) {
-        return ["error" => "Error al obtener juegos: " . $e->getMessage()];
-    } finally {
-        $mysqli->close();
-    }
-}
-
-/**
- * Obtiene juegos filtrados por plataforma
- * @param mixed $plataforma Nombre de la plataforma a buscar
- * @return array|array{error: string} Devuelve un array con los juegos filtrados
- */
-function mostrarJuegosPorPlataforma($plataforma)
-{
-    $mysqli = conectarBD();
-    try {
-        $stmt = $mysqli->prepare("SELECT id, titulo, genero, plataformas, imagen, descripcion FROM games WHERE JSON_CONTAINS(plataformas, ?);");
-        $jsonValue = json_encode($plataforma);
-        $stmt->bind_param("s", $jsonValue);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
-        $juegos = $resultado->fetch_all(MYSQLI_ASSOC);
-
-        foreach ($juegos as &$juego) {
-            if (isset($juego['plataformas'])) {
-                $juego['plataformas'] = json_decode($juego['plataformas'], true);
-            }
-        }
-        return $juegos;
-    } catch (Exception $e) {
-        return ["error" => "Error al obtener juegos: " . $e->getMessage()];
-    } finally {
-        $mysqli->close();
-    }
-}
-
-/**
- * Metodo para buscar juegos en titulo, genero y plataformas desde un único input
- * @param mixed $busqueda Texto de búsqueda que se aplicará a título, género y plataformas
- * @return array|array{error: string} Devuelve un array con los juegos encontrados
- */
-function buscarJuegosGlobal($busqueda)
-{
-    $mysqli = conectarBD();
-
-    try {
-        if (empty($busqueda)) {
-            return ["success" => false, "message" => "Debe proporcionar un término de búsqueda"];
-        }
-
-        // Preparar el término de búsqueda para LIKE
-        $searchTerm = "%" . $busqueda . "%";
-        $searchJson = json_encode($busqueda);
-
-        // Consulta que busca en título, género Y plataformas
-        $sql = "SELECT id, titulo, genero, plataformas, imagen, descripcion 
-                FROM games 
-                WHERE titulo LIKE ? 
-                   OR genero LIKE ? 
-                   OR JSON_SEARCH(plataformas, 'one', ?) IS NOT NULL
-                ORDER BY titulo ASC";
-
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param("sss", $searchTerm, $searchTerm, $busqueda);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
-        $juegos = $resultado->fetch_all(MYSQLI_ASSOC);
-
-        // Decodificar plataformas JSON
-        foreach ($juegos as &$juego) {
-            if (isset($juego['plataformas'])) {
-                $juego['plataformas'] = json_decode($juego['plataformas'], true);
-            }
-        }
-
-        return ["success" => true, "total" => count($juegos), "juegos" => $juegos];
-
-    } catch (Exception $e) {
-        return ["success" => false, "error" => "Error al buscar juegos: " . $e->getMessage()];
+        return ["error" => "Error al buscar juegos: " . $e->getMessage()];
     } finally {
         $mysqli->close();
     }

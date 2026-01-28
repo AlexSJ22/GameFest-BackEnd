@@ -578,10 +578,12 @@ function mostrarEventosPorFecha($fecha, $page = 1)
         $limit = 9;
         $offset = ($page - 1) * $limit;
 
-        $totalResult = $mysqli->query(
-            "SELECT COUNT(*) as total FROM events WHERE plazasLibres > 0"
+        $totalResult = $mysqli->prepare(
+            "SELECT COUNT(*) as total FROM events WHERE fecha =?;"
         );
-        $total = $totalResult->fetch_assoc()['total'];
+        $totalResult->bind_param("s", $fecha);
+        $totalResult->execute();
+        $total = $totalResult->get_result()->fetch_assoc()['total'];
 
         $stmt = $mysqli->prepare("SELECT id, titulo, tipo, fecha, hora, plazasLibres, imagen, descripcion FROM events WHERE fecha = ? ORDER BY hora ASC LIMIT ? OFFSET ?;");
         $stmt->bind_param("sii", $fecha, $limit, $offset);
@@ -617,10 +619,12 @@ function mostrarEventosPorTipo($tipo, $page = 1)
         $limit = 9;
         $offset = ($page - 1) * $limit;
 
-        $totalResult = $mysqli->query(
-            "SELECT COUNT(*) as total FROM events WHERE plazasLibres > 0"
+        $totalResult = $mysqli->prepare(
+            "SELECT COUNT(*) as total FROM events WHERE tipo =?;"
         );
-        $total = $totalResult->fetch_assoc()['total'];
+        $totalResult->bind_param("s", $tipo);
+        $totalResult->execute();
+        $total = $totalResult->get_result()->fetch_assoc()['total'];
 
         $stmt = $mysqli->prepare("SELECT id, titulo, tipo, fecha, hora, plazasLibres, imagen, descripcion FROM events WHERE tipo = ? ORDER BY fecha ASC, hora ASC LIMIT ? OFFSET ?;");
         $stmt->bind_param("sii", $tipo, $limit, $offset);

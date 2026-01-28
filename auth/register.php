@@ -1,6 +1,11 @@
 <?php
 require_once '../functions.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    enviarJSON(['success' => true], 200);
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     enviarJSON(['success' => false, 'message' => 'Método no permitido'], 405);
 }

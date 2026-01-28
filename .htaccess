@@ -1,10 +1,15 @@
 RewriteEngine On
 RewriteBase /GameFest-BackEnd/
 
-# CORS Headers
-Header set Access-Control-Allow-Origin "*"
-Header set Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS"
-Header set Access-Control-Allow-Headers "Content-Type"
+# CORS Headers para todas las respuestas
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+Header always set Access-Control-Max-Age "3600"
+
+# Responder inmediatamente a OPTIONS con 200
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^.*$ - [R=200,L]
 
 # ============================================
 # GAMES (públicos)
@@ -17,9 +22,10 @@ RewriteRule ^games/?$ games/games.php [L,QSA]
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^games/([0-9]+)/?$ games/detailGame.php?id=$1 [L,QSA]
 
-# GET /games/search?q=XXX -> games/gameFilter.php (BÚSQUEDA GLOBAL)
+# GET /games/search?q=XXX -> games/gameFilter.php
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^games/search/?$ games/gameFilter.php [L,QSA]
+
 # ============================================
 # EVENTS
 # ============================================
@@ -42,22 +48,6 @@ RewriteRule ^events/([0-9]+)/signup/?$ events/signup.php?id=$1 [L,QSA]
 # DELETE /events/5/signup -> events/unsignup.php?id=5
 RewriteCond %{REQUEST_METHOD} DELETE
 RewriteRule ^events/([0-9]+)/signup/?$ events/unsignup.php?id=$1 [L,QSA]
-
-# GET /events/filter/available?page=1 -> events/eventsWithSlots.php
-# IMPORTANTE: Las rutas de filtros van ANTES de /events para evitar conflictos
-RewriteCond %{REQUEST_METHOD} GET
-RewriteRule ^events/filter/available/?$ events/eventsWithSlots.php [L,QSA]
-
-# GET /events/filter/date?fecha=2026-02-15&page=1 -> events/eventsByDate.php
-RewriteCond %{REQUEST_METHOD} GET
-RewriteRule ^events/filter/date/?$ events/eventsByDate.php [L,QSA]
-
-# GET /events/filter/type?tipo=Competitivo&page=1 -> events/eventsByType.php
-RewriteCond %{REQUEST_METHOD} GET
-RewriteRule ^events/filter/type/?$ events/eventsByType.php [L,QSA]
-# ============================================
-# FILTERED EVENTS
-# ============================================
 
 # GET /events/filter/available?page=1 -> events/eventsWithSlots.php
 RewriteCond %{REQUEST_METHOD} GET

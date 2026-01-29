@@ -418,7 +418,8 @@ function obtenerMisEventos($userId = null)
 
     $mysqli = conectarBD();
     try {
-        $stmt = $mysqli->prepare("SELECT e.id, e.titulo, e.fecha, e.hora, e.imagen, e.descripcion FROM events e JOIN user_events ue ON ue.event_id = e.id WHERE ue.user_id = ?;");
+        // FIXED: Added e.tipo and e.plazasLibres to the SELECT
+        $stmt = $mysqli->prepare("SELECT e.id, e.titulo, e.tipo, e.fecha, e.hora, e.plazasLibres, e.imagen, e.descripcion FROM events e JOIN user_events ue ON ue.event_id = e.id WHERE ue.user_id = ?;");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);

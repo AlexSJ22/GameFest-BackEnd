@@ -472,48 +472,106 @@ function obtenerJuegos($id = null)
 }
 
 /**
- * Metodo para obtener uno o varios eventos de forma paginada o por ID
- * @param mixed $page (Opcional) Se proporciona el numero de la pagina
- * @param mixed $id (Opcional) Se proporciona el id del evento
- * @return array|array{error: string|bool|null}
+ * Super Función: Obtiene eventos por ID, o listados (con o sin filtros)
+ * @param int $page Número de página para la paginación
+ * @param int|null $id ID del evento (si se pasa, ignora el resto y devuelve solo ese)
+ * @param string|null $tipo Filtro por tipo
+ * @param string|null $fecha Filtro por fecha
+ * @param bool|int|string $soloPlazas Filtro para ver solo disponibles
  */
-function obtenerEventos($page = 1, $id = null)
+function obtenerEventos($page = 1, $id = null, $tipo = null, $fecha = null, $soloPlazas = null)
 {
     $mysqli = conectarBD();
+
     try {
+        // --- CASO 1: OBTENER UN SOLO EVENTO POR ID ---
         if ($id) {
             $stmt = $mysqli->prepare("SELECT * FROM events WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            $eventos = $stmt->get_result()->fetch_assoc();
+            $evento = $stmt->get_result()->fetch_assoc();
 
-            if (estaAutenticado() && $eventos) {
-                $eventos['inscrito'] = verificarInscrito($id);
+            if (estaAutenticado() && $evento) {
+                $evento['inscrito'] = verificarInscrito($id);
             }
-            return $eventos;
-        } else {
-            $limit = 9;
-            $offset = ($page - 1) * $limit;
-
-            $totalResult = $mysqli->query("SELECT COUNT(*) as total FROM events");
-            $total = $totalResult->fetch_assoc()['total'];
-
-            $stmt = $mysqli->prepare("SELECT * FROM events ORDER BY fecha ASC LIMIT ? OFFSET ?");
-            $stmt->bind_param("ii", $limit, $offset);
-            $stmt->execute();
-            $eventos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
-            if (estaAutenticado()) {
-                foreach ($eventos as &$evento) {
-                    $evento['inscrito'] = verificarInscrito($evento['id']);
-                }
-            }
-            return ["total" => $total, "eventos" => $eventos];
+            return $evento; // Retorna solo el objeto evento
         }
+
+        // --- CASO 2: LISTADO DE EVENTOS (CON O SIN FILTROS) ---
+
+        $limit = 9;
+        $offset = ($page - 1) * $limit;
+
+        // 1. Construcción dinámica de condiciones (WHERE)
+        $condiciones = [];
+        $params = [];
+        $tiposStr = "";
+
+        if (!empty($tipo)) {
+            $condiciones[] = "tipo = ?";
+            $params[] = $tipo;
+            $tiposStr .= "s";
+        }
+
+        if (!empty($fecha)) {
+            $condiciones[] = "fecha = ?";
+            $params[] = $fecha;
+            $tiposStr .= "s";
+        }
+
+        if ($soloPlazas === 'true' || $soloPlazas === true || $soloPlazas == 1) {
+            $condiciones[] = "plazasLibres > 0";
+        }
+
+        // Unimos las condiciones con AND
+        $whereSQL = "";
+        if (count($condiciones) > 0) {
+            $whereSQL = " WHERE " . implode(" AND ", $condiciones);
+        }
+
+        // 2. Consulta de TOTAL (Para la paginación)
+        $sqlCount = "SELECT COUNT(*) as total FROM events" . $whereSQL;
+        $stmtCount = $mysqli->prepare($sqlCount);
+
+        if (!empty($params)) {
+            $stmtCount->bind_param($tiposStr, ...$params);
+        }
+        $stmtCount->execute();
+        $total = $stmtCount->get_result()->fetch_assoc()['total'];
+        $stmtCount->close();
+
+        // 3. Consulta de DATOS
+        $sqlData = "SELECT id, titulo, tipo, fecha, hora, plazasLibres, imagen, descripcion 
+                    FROM events" . $whereSQL . " 
+                    ORDER BY fecha ASC, hora ASC 
+                    LIMIT ? OFFSET ?";
+
+        $stmtData = $mysqli->prepare($sqlData);
+
+        // Añadimos limit y offset a los parámetros
+        $paramsData = $params;
+        $paramsData[] = $limit;
+        $paramsData[] = $offset;
+        $tiposData = $tiposStr . "ii";
+
+        $stmtData->bind_param($tiposData, ...$paramsData);
+        $stmtData->execute();
+        $eventos = $stmtData->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Verificar inscripciones si es usuario
+        if (estaAutenticado()) {
+            foreach ($eventos as &$eventoItem) {
+                $eventoItem['inscrito'] = verificarInscrito($eventoItem['id']);
+            }
+        }
+
+        return ["total" => $total, "eventos" => $eventos];
+
     } catch (Exception $e) {
         return ["error" => "Error al obtener eventos: " . $e->getMessage()];
     } finally {
-        $mysqli->close();
+        if (isset($mysqli))
+            $mysqli->close();
     }
 }
 

@@ -24,6 +24,6 @@ if (estaAutenticado()) {
         ]
     ], 200);
 } else {
-    enviarJSON(['success' => false, 'message' => 'No hay sesión activa'], 401);
+    enviarJSON(['success' => false, 'message' => 'No hay sesión activa'], 200);
 }
 ?>

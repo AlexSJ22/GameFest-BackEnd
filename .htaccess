@@ -62,6 +62,10 @@ RewriteRule ^events/filter/date/?$ events/eventsByDate.php [L,QSA]
 RewriteCond %{REQUEST_METHOD} GET
 RewriteRule ^events/filter/type/?$ events/eventsByType.php [L,QSA]
 
+# POST /events/upload-image -> events/upload-image.php
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^events/upload-image/?$ events/upload-image.php [L,QSA]
+
 # ============================================
 # AUTH (privados con sesiones)
 # ============================================

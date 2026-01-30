@@ -23,6 +23,6 @@ $resultado = loginUsuario($email, $password);
 if ($resultado['success']) {
     enviarJSON($resultado, 200);
 } else {
-    enviarJSON($resultado, 401);
+    enviarJSON($resultado, 200);
 }
 ?>

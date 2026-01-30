@@ -37,6 +37,6 @@ $resultado = registrarUsuario($username, $email, $password);
 if ($resultado['success']) {
     enviarJSON($resultado, 201);
 } else {
-    enviarJSON($resultado, 400);
+    enviarJSON($resultado, 200);
 }
 ?>
